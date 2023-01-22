@@ -18,8 +18,8 @@ sidebar-avatar: /img/will-wang.jpg      # use absolute URL, seeing it's used in 
 
 # SNS settings
 RSS: false
-weibo_username:     肥猫土豆zsyy
-zhihu_username:     猫头少年
+weibo_username:     5975176296
+zhihu_username:     zhou-si-yuan-17-38
 github_username:    shenhaidalizi
 # facebook_username:  username
 # jianshu_username:   jianshu_id
@@ -62,9 +62,9 @@ gitalk:
   enable: true    #是否开启Gitalk评论
   clientID: ae47d898c3d118b467be                            #生成的clientID
   clientSecret: c30e8df95d413ec73785dea5b4237424165f77c7    #生成的clientSecret
-  repo: flyingwzb.github.io    #仓库名称
-  owner: flyingwzb    #github用户名
-  admin: flyingwzb
+  repo: shenhaidalizi.github.io    #仓库名称
+  owner: shenhaidalizi    #github用户名
+  admin: shenhaidalizi
   distractionFreeMode: true #是否启用类似FB的阴影遮罩
 
 
