@@ -4,7 +4,7 @@ SEOTitle: 肥猫土豆的懒人沙发
 header-img: img/post-bg-index.jpg
 email: 1920858503@qq.com
 description: "猫头少年 立志向前"
-keyword: "王志彪的博客, Will Wang, 王志彪, Java"
+keyword: "肥猫土豆的小窝，如有打扰，不胜荣幸"
 url: "https://shenhaidalizi.github.io/"          # your host, for absolute URL
 baseurl: ""      # for example, '/blog' if your blog hosted on 'host/blog'
 github_repo: "https://github.com/shenhaidalizi/shenhaidalizi.github.io.git" # you code repository
@@ -12,7 +12,7 @@ github_repo: "https://github.com/shenhaidalizi/shenhaidalizi.github.io.git" # yo
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "严于律己，宽以待人。"
-sidebar-avatar: /img/will-wang.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/_0%ESDY%R1YNO]EJ58`{B%T.gif     # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
