@@ -1,0 +1,686 @@
+---
+layout:     post
+title:      [内存管理]
+subtitle:   [第三章笔记]
+date:       [2017-12-31]
+author:     Siyuan Zhou
+header-img: img/post-bg-article.jpg
+catalog: true
+tags:
+    - 标签
+---
+
+#  存储管理基础
+
+帕金森定律：无论存储器空间有多大，程序都能将其耗尽。
+
+![img](https://img-blog.csdnimg.cn/f37e0a1827bb4b30ad45c93381cc1b08.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_18,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+存储组织：在存储技术和CPU寻址技术许可的范围内组织合理的存储结构。其依据是访问速度匹配关系、容量要求和价格。
+
+典型的层次式存储组织：访问速度越来越慢，容量越来越大，价格越来越便宜。
+
+存储管理的功能：
+
+- 存储分配和回收
+- 地址变换
+- 存储共享和保护
+- 存储器扩充
+
+基本目标：
+
+地址独立：程序发出的地址与物理地址无关；
+
+地址保护：一个程序不能访问另一个程序的地址空间。
+
+
+
+地址空间：源程序经过编译后得到的目标程序，存在于它所限定的地址范围内。这个范围成为地址空间。简言之，地址空间是逻辑地址的集合。
+
+存储空间：存储空间是指主存中存储信息的物理单元的集合，这些单元的编号成为物理地址或绝对地址。简言之，存储空间是物理地址的集合。
+
+# 单道程序的内存管理
+
+在单道程序环境下，内存中只有两个程序：一个用户程序和一个操作系统。因此可以讲用户程序永远加载到同一个地址，即用户程序永远从同一个地方开始运行。
+
+优点：最简单，适用于单用户、单任务的OS。执行过程中无需任何地址翻译工作，程序运行速度快。
+
+缺点：比物理内存大的程序无法加载，因而无法运行。造成资源浪费（小程序会造成空间浪费；不区分常用/非常用数据；I/O时间长会造成计算资源浪费）。
+
+# 多道程序的存储管理
+
+空间的分配：分区式分配：把内存分为一些大小相等或不等的分区，每个应用程序占用一个或几个分区，操作系统占用其中一个分区。（适用于多道程序系统和分时系统，支持多个程序并发执行，但难以进行内存分区的共享）
+
+分区方法：固定式分区，可变式分区。
+
+## 固定式分区
+
+优点：易于实现，开销小。
+
+缺点：内碎片造成浪费，分区总数固定，限制了并发执行的程序数目。
+
+## 可变式分区
+
+有点：没有内碎片。
+
+缺点：有外碎片。
+
+消除外部碎片的方法：紧凑技术。
+
+## 闲置空间的管理
+
+在管理内存的时候，OS需要知道内存空间有多少空闲，跟踪的办法有两种：位图表示法和链表表示法。
+
+### 位图表示法
+
+给每个分配单元赋予一个字位，用来记录该分配单元是否闲置。例如，字位取值为0表示单元闲置，取值为1则表示已被占用，这种表示方法就是位图表示法。
+
+![img](https://img-blog.csdnimg.cn/73c1aed695594bf7ba9f6db30b609f7d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_16,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+位图表示法：空间成本固定，时间成本低，没有容错能力。
+
+### 链表表示法
+
+将分配单元按照是否闲置链接起来，这种方法称为链表表示法。
+
+![img](https://img-blog.csdnimg.cn/4fbb48ceac9e4118bfb71a38962afaaa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+ 链表表示法：空间成本高，时间成本高，有一定的容错能力。
+
+## 可变分区的管理
+
+内存分配采用两张表：已分配分区表和未分配分区表。
+
+每张表的表项为存储控制块MCB（Memory Control Block），包括AMCB（Allocated MCB）和FMCB （Free MCB）。
+
+空闲分区控制块按某种次序构成FMCB链表结构。当分区被分配出去以后，前、后向指针无意义。
+
+![img](https://img-blog.csdnimg.cn/6f27ef951bb84ad68edebc3f8adcf6d5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_13,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+### 分配内存 
+
+事先规定 size 是不再切割的剩余分区的大小。
+
+设请求的分区大小为 u.size，空闲分区的大小为m.size。
+
+若 m.size-u.size≤size，将整个分区分配给请求者。
+
+否则，从该分区中按请求的大小划分出一块内存空间分配出去，余下的部分仍留在空闲分区表/链中。
+
+### 回收内存
+
+情况1：回收分区上邻接一个空闲分区，合并后首地址为空闲分区的首地址，大小为二者之和。
+
+情况2：回收分区下邻接一个空闲分区，合并后首地址为回收分区的首地址，大小为二者之和。
+
+情况3：回收分区上下邻接空闲分区，合并后首地址为 上空闲分区的首地址，大小为三者之和。
+
+情况4：回收分区不邻接空闲分区，这时在空闲分区表 中新建一表项，并填写分区大小等信息。
+
+### 基于顺序搜索的分配算法
+
+- .首次适应算法（First Fit）：每个空白区按其在存储空间中地址递增的顺序连在一起，在为作业分配存储区域时，从这个空白区域链的始端开始查找，选择第一个足以满足请求的空白块。
+- 下次适应算法（Next Fit）：把存储空间中空白区构成一个循环链，每次为存储请求查找合适的分区时，总是从上次查找结束的地方开始，只要找到一个足够大的空白区，就将它划分后分配出去。
+- 最佳适应算法（Best Fit）：为一个作业选择分区时，总是寻找其大小最接近于作业所要求的存储区域。
+- 最坏适应算法（Worst Fit）：为作业选择存储区域时，总是寻找最大的空白区。
+
+### 基于索引搜索的分配算法
+
+基于顺序搜索的动态分区分配算法一般只是适合于较小的系统，如果系统的分区很多，空闲分区表（链）可能很大（很长） ，检索速度会比较慢。为了提高搜索空闲分区的速度，大中型系统采用了基于索引搜索的动态分区分配算法。
+
+快速适应算法：又称为分类搜索法，把空闲分区按容量大小进行分类，经常用到长度的空闲区设 立单独的空闲区链表。系统为多个空闲链表设立一张管理索引表。
+
+伙伴系统：伙伴：在分配存储块时将一个大的存储块分裂成两个大小相等的小块，这两个小块就称为 “伙伴” 。
+
+![img](https://img-blog.csdnimg.cn/659d5a0b2bf643b68802224c9c3ce9f9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+### 存储分配的三种方式
+
+直接指定方式：程序员在编程序时,或编译程序(汇编程序)对源程序进行编译(汇编)时,所用的是实际地址。
+
+静态分配(Static Allocation)：程序员编程时,或由编译程序产生的目的程序,均可从其地址空间的零地址开始；当装配程序对其进行连接装入时才确定它们在主存中的地址。
+
+动态分配(Dynamic Allocation)：作业在存储空间中的位置,在其装入时确定,在其执行过程中可根据需要申请附加的存储空间,而且一个作业已占用的部分区域不再需要时,可以要求归还给系统。
+
+### 可重定位分区分配
+
+可重定位分区分配（紧凑）：定时的或在内存紧张时，移动某些已分配区中的信息，把存储空间中所有的空白区合并为一个大的连续区。
+
+ 缺点：性能开销，设备依赖（DMA），间接寻址。
+
+# 程序的装入和链接
+
+编译(compile)：由编译程序将用户源程序编译成若干个目标模块。
+
+链接(linking)：由链接程序将目标模块和相应的库函数链接成可装载模块（可执行文件）。
+
+装入(loading)：由装载程序 将可装载入模块装入内存。
+
+## 程序的链接
+
+采用静态链接和动态链接方式：
+
+静态链接：用户一个工程中所需的多个程序采用静态链接的方式链接在一起。当我们希望共享库的函数代码直接链接入程序代码中，也采用静态链接方式。
+
+动态链接：用于链接共享库代码。当程序运行中需要某些目标模块时，才对它们进行链接，具有高效且节省内存空间的优点。但相比静态链接，使用动态链接库的程序相对慢。
+
+## 程序的装入
+
+一般采用动态运行时装入方式：
+
+程序在内存中的位置经常要改变。程序在内存中的移动意味着它的物理位置发生了变化，这时必须对程序和数据的地址 (绝对地址) 进行修改后方能运行。
+
+为了保证程序在内存中的位置可以改变。装入程序把装入模块装入内存后，并不立即把装入模块中相对地址转换为绝对地址，而是在程序运行时才进行。
+
+这种方式需要一个重定位寄存器来支持，在程序运行过程中进行地址转换。
+
+## ELF可执行文件格式
+
+![img](https://img-blog.csdnimg.cn/51f4984e802a4a8895d5a76d6fd8965f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+一个程序本质上都是由 bss段、data段、text段三个组成的。在C语言之类的程序编译完成之后，已初始化的全局变量保存在data段中，未初始化的全局变量保存在bss段中。
+
+text和data段都在可执行文件中，由系统从可执行文件中加载， 而bss段不在可执行文件中，由系统初始化。
+
+一个装入内存的可执行程序，除了bss、data和text段外，还需构建一个栈（stack）和一个堆（heap）。
+
+栈(stack)：存放、交换临时数据的内存区。
+
+- 用户存放程序局部变量的内存区域，（但不包括static声明的变量，static意味着在数据段中存放变量）。
+- 保存/恢复调用现场。在函数被调用时，其参数也会被压入发起调用的进程栈中，并且待到调用结束后，函数的返回值也会被存放回栈中。
+
+堆（heap）：存放进程运行中动态分配的内存段。
+
+- 它的大小并不固定，可动态扩张或缩减。当进程调用malloc等函数分配内存时，新分配的内存就被动态添加到堆上（堆被扩张）；当利用free等函数释放内存时，被释放的内存从堆中被剔除（堆被缩减）。
+
+![img](https://img-blog.csdnimg.cn/df5206fc9c3040d58996fa6cae0dea2c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_11,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+## Linux下可执行文件的格式
+
+在Linux下可执行文件的格式为ELF（Executable and Linkable Format），ELF文件分为三类：
+
+- 可重定位（relocatable）文件，保存着代码和适当的数据，用来和其他的object文件一起来创建一个可执行文件或者是一个共享文件。
+- 可执行（executable）文件，保存着一个用来执行的程序，该文件指出了exec（BA_OS）如何来创建程序进程映像。
+- 共享object文件，保存着代码和合适的数据，用来被下面的两个链接器链接。第一个是链接编辑器（静态链接），可以和其他的可重定位和共享object文件一起来创建object文件；第二个是动态链接器，联合一个可执行文件和其他的共享object文件来创建一个进程映象。
+
+
+
+##  ELF文件头定义
+
+![img](https://img-blog.csdnimg.cn/f0f5c6c9f2e54b779053f273dccd92c5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+ 程序在链接后会对jal指令的标签进行具体赋值。
+
+## 程序的装载
+
+装载前的工作： shell调用fork()系统调用，创建出一个子进程。
+
+装载工作： 子进程调用execve()加载program(即要执行的程序)。
+
+程序如何被加载： 加载器在加载程序的时候只需要看ELF文件中和 segment相关的信息即可。我们用readelf工具将segment读取出来。其中Type为Load的segment是需要被加载到内存中的部分。
+
+程序的装载流程：
+
+- 读取ELF头部的魔数(Magic Number)，以确认该文件确实是ELF文件。
+- ELF文件的头四个字节依次为’0x7f’、’E’、‘L’、‘F’。
+- 加载器会首先对比这四个字节，若不一致，则报错。
+- 找到段表项。
+- ELF头部会给出的段表起始位置在文件中的偏移，段表项的大小，以及段表包含了多少项。根据这些信息可以找到每一个段表项。
+- 对于每个段表项解析出各个段应当被加载的虚地址，在文件中的偏移。以及在内存中的大小 和在文件中的大小。（段在文件中的大小小于等于内存中的大小）。
+- 对于每一个段，根据其在内存中的大小，为其分配足够的物理页，并映射到指定的虚地址上。再将文件中的内容拷贝到内存中。
+- 若ELF中记录的段在内存中的大小大于在文件中的大小，则多出来的部分用0进行填充。
+- 设置进程控制块中的PC为ELF文件中记载的入口地址。
+- 控制权交给进程开始执行！
+
+# 页式内存管理
+
+如果可以把一个逻辑地址连续的的程序分散存放到若干不连续的内存区域内，并保证程序的正确执行，则既可充分利用内存空间，又可减少移动带来的开销。这就是页式管理的基本思想。
+
+### 纯分页系统
+
+在分页存储管理方式中，如果不具备页面对换功能，必须把它的所有页一次装到主存的页框内；如果当时页框数不足，则该作业必须等待，系统再调度另外作业。
+
+优点：没有外碎片，每个内碎片不超过页大小。程序不必连续存放。便于改变程序占用空间的大小（主要指随着程序运行而动态生成的数据增多，要求地址空间相应增长，通常由系统调用完成而不是操作系统自动完成）。
+
+缺点：程序全部装入内存。
+
+### 分页地址结构
+
+页：在分页存储管理系统中，把每个作业的地址空间分成一些大小相等的片， 称之为页面或页。
+
+存储块：在分页存储管理系统中，把主存的存储空间也分成与页面相同大小的片，这些片称为存储块，或称为页框。
+
+![img](https://img-blog.csdnimg.cn/0ba26c72251841b2824278f133565df8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_11,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+现代操作系统中，最常用的页面大小为4KB。
+
+若页面较小 ：减少页内碎片和总的内存碎片，有利于提高内存利用率。每个进程页面数增多，使页表长度增加，占用内存较大。页面换进换出速度将降低。
+
+若页面较大 ：每个进程页面数减少，页表长度减少，占用内存较小。页面换进换出速度将提高。增加页内碎片增大，不利于提高内存利用率。
+
+### 地址变换——页表查找
+
+![img](https://img-blog.csdnimg.cn/e7b662f02248454d87c29d95a2bcc079.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+### 关于页表
+
+页表存放在内存中，属于进程的现场信息。
+
+用途： 1. 记录进程的内存分配情况 2. 实现进程运行时的动态重定位。
+
+访问一个数据需访问内存 2 次 (页表一次，内存一次)。
+
+页表的基址及长度由页表寄存器给出。
+
+### 地址变换机构
+
+当进程要访问某个逻辑地址中的数据时，分页地址变换机构会自动地将有效地址（相对地址）分为页号和页内地址两部分。
+
+将页号与页表长度进行比较，如果页号大于或等于页表长度，则表示本次所访问的地址已超越进程的地址 空间，产生地址越界中断。（越界保护）
+
+将页表始址与页号和页表项长度的乘积相加，得到该表项在页表中的位置，于是可从中得到该页的物理块号，将之装入物理地址寄存器中。（地址变换）
+
+将有效地址寄存器中的页内地址送入物理地址寄存器的块内地址字段中。
+
+![img](https://img-blog.csdnimg.cn/ce308f8dfa9648ffa7addc2c20463e6a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+![img](https://img-blog.csdnimg.cn/5f9c3a7d42314cf58fbf21370620b01a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+### 一级页表的问题
+
+若逻辑地址空间很大 (2^32 ∼2^64 ) ，则划分的页比较多，页表就很大，占用的存储空间大（要求连续），实现较困难。
+
+例如，对于 32 位逻辑地址空间的分页系统，如果规定页面大小为 4 KB 即 2^12 B，则在每个进程页表就由高达2^20 页组成。设每个页表项占用4个字节，每个进程仅仅页表就要占用 4 MB 的内存空间。
+
+解决问题的方法：动态调入页表: 只将当前需用的部分页表项调入内存，其余的需用时再调入。 多级页表。
+
+## 二级页表
+
+将页表再进行分页，离散地将各个页表页面存放在不同的物理块中，同时也再建立一张外部页表用以记录页表页面对应的物理块号。
+
+正在运行的进程，必须把外部页表（页表的页表）调入内存，而动态调入内部页表。只将当前所需的一些内层页表装入内存，其余部分根据需要再陆续调入。
+
+![img](https://img-blog.csdnimg.cn/dfa6237ad00a45bf834946bf66060c8c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_19,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+![img](https://img-blog.csdnimg.cn/7371ae349e1249f1959d6f84fcfd22d4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+## 多级页表
+
+多级页表结构中，指令所给出的地址除偏移地址之外的各部分全是各级页表的页表号或页号，而各级页表中记录的全是物理页号，指向下级页表或真正的被访问页。
+
+ ![img](https://img-blog.csdnimg.cn/1ebad2c8e0b54f50a482f500c332159b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+### 页表机制带来的问题
+
+页表机制带来的严重问题就是内存访问效率的严重下降，以二级分页地址机制为例，由不分页时的 1 次，上升到了3 次，这个问题必须解决。
+
+## 页表快速访问机制——MMU
+
+为了提高地址转换效率，CPU内部增加了一个硬件单元，称为存储管理单元MMU（Memory Management Unit）。
+
+其内部主要部件：
+
+页表Cache：又称为TLB，用于存放虚拟地址与相应的物理地址；
+
+TLB控制单元：TLB内容填充、刷新、覆盖，以及越界检查。
+
+页表（遍历）查找单元：若TLB未命中，自动查找多级页表，将找到的物理地址送与TLB控制单元。（可用软件实现）
+
+### MMU的工作过程
+
+MMU得到VA后先在TLB内查找，若没找到匹配的PTE条目就到外部页表查询，并置换进TLB；
+
+根据PTE条目中对访问权限的限定，检查该条VA指令是否符合，若不符合则不继续，并产生异常；
+
+符合后根据VA的地址分段查询页表，若该地址已映射到内存中（根据PTE的标识），保持offset不变，组合出物理地址，发送出去。
+
+若该地址尚未映射到内存中，则产生page fault异常。
+
+## 快表(TLB)
+
+快表又称联想存储器 (Associative Memory) 、TLB (Translation Lookaside Buffer) 转换表查找缓冲区，IBM最早采用TLB。
+
+快表是一种特殊的高速缓冲存储器（Cache） ， 内容是页表中的一部分或全部内容。
+
+CPU 产生逻辑地址的页号，首先在快表中寻找， 若命中就找出其对应的物理块；若未命中，再到 页表中找其对应的物理块，并将之复制到快表。 若快表中内容满，则按某种算法淘汰某些页。
+
+通常，TLB中的条目数并不多，在64~1024之间。
+
+## 反置页表(Inverted page table)
+
+一般意义上，每个进程都有一个相关页表。该进程所使用的每个页都在页表中有一项。这种页的表示方式比较自然，这是因为进程是通过页的虚拟地址来引用页的。操作系统必须将这种引用转换成物理内存地址。
+
+这种方法的缺点之一是每个页表可能有很多项。这些表可能消耗大量物理内存，却仅用来跟踪物理内存是如何使用的。如每个使用32位逻辑地址的进程其页表长度均为4MB。
+
+为了解决这个问题，可以使用反向页表（inverted pagetable）。
+
+反置页表不是依据进程的逻辑页号来组织，而是依据该进程在内 存中的物理页面号来组织（即： 按物理页面号排列），其表项的内容是逻辑页号P 及隶属进程标志符 pid 。
+
+反置页表的大小只与物理内存的大小相关，与逻辑空间大小和进程数无关。如: 64M主存,若页面大 小为 4K,则反向页表只需 64KB。
+
+![img](https://img-blog.csdnimg.cn/5001836d5a0c4087a9e9eb6934a3fdb9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+## 页共享与保护
+
+页的保护
+
+页式存储管理系统提供了两种方式：
+
+地址越界保护；
+
+在页表中设置保护位（定义操作权限：只读，读写，执行等）。
+
+共享带来的问题
+
+若共享数据与不共享数据划在同一块中，则： 有些不共享的数据也被共享，不易保密。
+
+实现数据共享的最好方法：分段存储管理。
+
+![img](https://img-blog.csdnimg.cn/b2d111fc6e1b4f598d4fc1a7ea31d369.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_19,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+# 段式存储管理
+
+方便编程：通常一个作业是由多个程序段和数据段组成的， 用户一般按逻辑关系对作业分段，并能根据名字来访问程序段和数据段。
+
+信息共享：共享是以信息的逻辑单位为基础的。页是存储信息的物理单位，段却是信息的逻辑单位。页式管理中地址空间是一维的，主程序，子程序都顺序排列，共享公用子程序比较困难，一 个共享过程可能需要几十个页面。
+
+信息保护：页式管理中，一个页面中可能装有 2 个不同的子程序段的指令代码，不能通过页面共享实现共享一个逻辑上完整的子程序或数据块。段式管理中，可以以信息的逻辑单位进行保护。
+
+动态增长：实际应用中，某些段（数据段）会不断增长，前面的 存储管理方法均难以实现。
+
+动态链接：动态链接在程序运行时才把主程序和要用到的目标程 序（程序段）链接起来。
+
+## 分段地址空间
+
+一个段可定义为一组逻辑信息，每个作业的地址空间是由一些分段构成的，每段都有自己的名字（通常是段号），且都是一段连续的地址空间。（全局连续 vs 局部连续）
+
+![img](https://img-blog.csdnimg.cn/c6b267cb2a704efa95447fbe27e31b48.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_19,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+### 段式地址结构
+
+逻辑地址结构： 段号S + 位移量W
+
+![img](https://img-blog.csdnimg.cn/bfb64d06bbee44d5a515a5686fa5b722.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_17,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+段表记录了段与内存位置的对应关系。
+
+段表保存在内存中。
+
+段表的基址及长度由段表寄存器给出。
+
+访问一个字节的数据/指令需访问内存两次 (段表一次，内存一次)。
+
+### 地址变换
+
+![img](https://img-blog.csdnimg.cn/4662818c11d84ef0ad7b9150cc9e6535.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+1. 系统将逻辑地址中的段号 S 与段表长度 TL 进行比较。
+2. 若 S>TL，表示段号太大，是访问越界，于是产生越界中断信号。
+3. 若未越界，则根据段表的始址和该段的段号，计算出 该段对应段表项的位置，从中读出该段在内存的始址。
+4. 再检查段内地址 d，是否超过该段的段长 SL。
+5. 若超过，即 d >SL，同样发出越界中断信号。
+6. 若未越界，则将该段的基址与段内地址 d 相加，即可 得到要访问的内存物理地址。
+
+ ![img](https://img-blog.csdnimg.cn/d8c3f06b46834507b8b52545946a11fa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+## 分段管理的优缺点
+
+优点： 分段系统易于实现段的共享，对段的保护也十分简单。
+
+缺点： 处理机要为地址变换花费时间；要为表格提供附加的存储空间。为满足分段的动态增长和减少外碎片，要采用拼接手段。在辅存中管理不定长度的分段困难较多。分段的最大尺寸受到主存可用空间的限制。
+
+## 分页与分段的比较
+
+分页的作业的地址空间是单一的线性地址空间， 分段作业的地址空间是二维的。
+
+“页”是信息的“物理”单位，大小固定。 “段”是信息的逻辑单位，即它是一组有意义的信息，其长度不定。
+
+分页活动用户是看不见的，而是系统对于主存的管理。分段是用户可见的（分段可以在用户编程时确定，也可以在编译程序对源程序编译时根据信息的性质来划分）。
+
+![img](https://img-blog.csdnimg.cn/f1ac5f98366e46e7868e8f5a8afe5ec0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+# 段页式存储管理
+
+基本思想：用分段方法来分配和管理虚拟存储器，而用分页方法来分配和管理实存储器。
+
+段页式存储管理是分段和分页原理的结合，即先将用户程序分成若干个段（段式） ，并为每一个段赋一个段名，再把每个段分成若干个页（页式） 。
+
+其地址结构由段号、段内页号、及页内位移三部分所组成。
+
+![img](https://img-blog.csdnimg.cn/7ea2b4f218504f188e3bcb921eff6d2e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_17,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+系统中设段表和页表，均存放于内存中。读一字节的指令或数据须访问内存三次。为提高执行速度可增设高速缓冲寄存器。
+
+每个进程一张段表，每个段一张页表。
+
+段表含段号、页表始址和页表长度。页表含页号和块号。
+
+ ![img](https://img-blog.csdnimg.cn/2e471571b845497d97e5e5107350ae0e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+## 段页式地址变换
+
+从 PCB 中取出段表始址和段表长度，装入段表寄存器。
+
+将段号与段表长度进行比较，若段号大于或等于段表长度，产生越界中断。
+
+利用段表始址与段号得到该段表项在段表中的位置。 取出该段的页表始址和页表长度。
+
+将页号与页表长度进行比较，若页号大于或等于页表长度，产生越界中断。
+
+利用页表始址与页号得到该页表项在页表中的位置。
+
+取出该页的物理块号，与页内地址拼接得到实际的物理地址。
+
+ ![img](https://img-blog.csdnimg.cn/a4ea4856346441a3a479ea5f3da8f00e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+# 虚拟存储管理
+
+虚拟存储考虑的问题主要在于如何超越物理内存的限制。
+
+覆盖（节约，时间上扩展） ：重用内存， 突破内存占用空间一致性。
+
+交换（借用 ，空间上扩展）：辅助存储，调度，突破内存占用时间连续性。
+
+## 覆盖
+
+覆盖：“覆盖”管理，就是把一个大的程序划分成一系列的覆盖，每个覆盖是一个相对独立的程序单位。把程序执行时并不要求同时装入主存的覆盖组成一组，称其为覆盖段，这个覆盖段被分配到同一个存储区域。这个存储区域称之为覆盖区，它与覆盖段一一对应。
+
+缺点：编程时必须划分程序模块和确定程序模块之间的覆盖关系，增加编程复杂度。从外存装入覆盖文件，以时间延长来换取空间节省。
+
+![img](https://img-blog.csdnimg.cn/d4723eda9884476ba902b0d8a00eb6ca.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_19,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+## 交换
+
+交换：广义的说，所谓交换就是把暂时不用的某个（或某些）程序及其数据的部分或全部从主存 移到辅存中去，以便腾出必要的存储空间；接着把指定程序或数据从辅存读到相应的主存中，并 将控制转给它，让其在系统上运行。
+
+优点：增加并发运行的程序数目，并且给用户提供适当的响应时间；编写程序时不影响程序结构。
+
+缺点：对换入和换出的控制增加处理机开销；程序整个地址空间都进行传送，没有考虑执行过程中地址访问的统计特性。
+
+## 虚拟存储
+
+虚拟存储是计算机系统存储管理的一种技术。它为每个进程提供了一个大的、一致的、连续的可用的和私有的地址空间（一个连续完整的地址空间）。虚拟存储提供了3个能力：
+
+- 给所有进程提供一致的地址空间，每个进程都认为自己是在独占使用单机系统的存储资源；
+- 保护每个进程的地址空间不被其他进程破坏，隔离了进程的地址访问；
+- 根据缓存原理，上层存储是下层存储的缓存，虚拟内存把主存作为磁盘的高速缓存，在主存和磁盘之间根据需要来回传送数据，高效地使用了主存；
+
+按需装载：在程序装入时，不必将其全部读入到内存，而只需将当前需要执行的部分页或段读入到内存，就可让程序开始执行。
+
+缺页调入：在程序执行过程中，如果需执行的指令或访问的数据尚未在内存（称为缺页或缺段），则由处理器通知操作系统将相应的页或段调入到内存，然后继续执行程序。
+
+不用调出：另一方面，操作系统将内存中暂时不使用的页或段调出保存在外存上，从而腾出空间存放将要装入的程序以及将要调入的页或段――具有请求调入和置换功能，只需程序的一部分在内存就可执行，对于动态链接库也可以请求调入。
+
+优点： 可在较小的可用内存中执行较大的用户程序；可在内存中容纳更多程序并发执行；不必影响编程时的程序结构（与覆盖技术比较） （对用户（编程人员）透明）；提供给用户可用的虚拟内存空间通常大于物理内存 (real memory)。
+
+代价：虚拟存储量的扩大是以牺牲 CPU 工作时间以及内外存交换时间为代价。
+
+限制：虚拟内存的最大容量由计算机的地址结构决定。如 32 位机器，虚拟存储器的最大容量就是 4G，再大 CPU 无法直接访问。
+
+## 与Cache-主存机制的异同
+
+相同点：
+
+- 出发点相同：二者都是为了提高存储系统的性能价格比而构造的分层存储体系，都力图使存储系统的性能接近高速存储器，而价格和容量接近低速存储器。
+- 原理相同：都是利用了程序运行时的局部性原理把最近常用的信息块从相对慢速而大容量的存储器调入相对高速而小容量的存储器。
+
+不同点：
+
+- 侧重点不同：cache主要解决主存与CPU的速度差异问题；虚存主要解决存储容量问题，另外还包括存储管理、主存分配和存储保护等方面。
+- 数据通路不同：CPU与cache和主存之间均有直接访问通路，cache不命中时可直接访问主存；而虚存所依赖的辅存与CPU之间不存在直接的数据通路，当主存不命中时只能通过调页 解决，CPU最终还是要访问主存。
+- 透明性不同：cache的管理完全由硬件完成，对系统程序员和应用程序员均透明；而虚存管理由软件（OS）和硬件共同完成，由于软件的介入，虚存对实现存储管理的系统程序员不透明，而只对应用程序员透明（段式和段页式管理对应用程序员“半透明”）。
+- 未命中时的损失不同：由于主存的存取时间是 cache的存取时间的5～10倍，而主存的存取速度通常比辅存的存取速度快上千倍，故主存未命中时系统的性能损失要远大于cache未命中时的损失。
+
+## 请求分页（段）系统
+
+在分页(段)系统的基础上，增加了请求调页(段)功能、页 面(段)置换功能所形成的页(段)式虚拟存储器系统。
+
+它允许只装入若干页(段)的用户程序和数据，便可启动运行，以后在硬件支持下通过调页(段)功能和置换页(段)功能，陆续将要运行的页面(段)调入内存，同时把暂不运行的页面(段)换到外存上，置换时以页面(段)为单位。
+
+系统须设置相应的硬件支持和软件： 硬件支持：请求分页(段)的页(段)表机制、缺页 (段)中断机构和地址变换机构。 软件：请求调页(段)功能和页(段)置换功能的软件。
+
+### 请求式分页系统
+
+在运行作业之前，只要求把当前需要的一部分页面装入主存。当需要其它的页时，可自动的选择一些页交换倒辅存去，同时把所需的页调入主存。
+
+### 进程的逻辑空间（虚拟空间）
+
+一个进程的逻辑空间的建立是通过链接器（Linker），将构成进程所需要的所有程序及运行所需环境，按照某种规则装配链接而形成的一种规范格式(布局)，这种格式按字节从0开始编址所形成的空间也称为该进程的逻辑地址空间。其中OS所使用的空间称为系统空间，其它部分称为用户空间。系统空间对用户空间不可见。后面只讨论用户可见部分。由于该逻辑空间并不是真实存在的，所以也称为进程的虚拟（地址）空间。
+
+![img](https://img-blog.csdnimg.cn/afc84fb54d364908a8f68aa323f411e6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+### 虚拟地址空间和虚拟存储空间
+
+进程的虚拟地址空间即为进程在内存中存放的逻辑视图。因此，一个进程的虚拟地址空间的大小与该进程的虚拟存储空间的大小相同。且都从0开始编址，有些书中也将虚拟存储空间称虚拟内存空间。 
+
+### 交换分区（交换文件）
+
+是一段连续的磁盘空间（按页划分的），并且对用户不可见。它的功能就是在物理内存不够的情况下，操作系统先把内存中暂时不用的数据，存到硬盘的交换空间，腾出物理内存来让别的程序运行。
+
+### 地址映射问题
+
+![img](https://img-blog.csdnimg.cn/1f9a62cd8adb4333936c7291aadf5251.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+
+
+### 请求式分页管理的页表
+
+![img](https://img-blog.csdnimg.cn/402da6a9539c400fb2cbd70483b161c2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+驻留位：1表示该页位于内存当中，0，表示该页当前还在外存当中。
+
+保护位：只读、可写、可执行。
+
+修改位：表明此页在内存中是否被修改过。
+
+访问（统计）位：用于页面置换算法。
+
+### 调入问题
+
+什么程序和数据调入主存，何时调入，如何调入？
+
+\1. 什么程序和数据调入主存？
+
+OS的核心部分的程序和数据； 正在运行的用户进程相关的程序及数据。
+
+\2. 何时调入？
+
+OS在系统启动时调入。
+
+用户程序的调入取决于调入策略。
+
+常用的调度策略有： 预调页：事先调入页面的策略。按需调页：仅当需要时才调入页面的策略。
+
+\3. 如何调入？ 缺页错误处理机制。
+
+### 缺页错误处理过程
+
+当进程执行过程中需访问的页面不在物理存储器中时，会引发发生缺页中断，进行所需页面换入，步骤如下：
+
+1. 陷入内核态，保存必要的信息（OS及用户进程状态相关的信息）。（现场保护）
+2. 查找出来发生页面中断的虚拟页面（进程地址空间中的页面）。这个虚拟页面的信息通常会保存在一个硬件寄存器中，如果没有的话，操作系统必须检索程序计数器，取出这条指令，用软件分析该指令，通过分析找出发生页面中断的虚拟页面。（页面定位）
+3. 检查虚拟地址的有效性及安全保护位。如果发生保护错误，则杀死该进程。（权限检查）
+4. 查找一个空闲的页框(物理内存中的页面)，如果没有空闲页框则需要通过页面置换算法找到一个需要换出的页框。（新页面调入（1））
+5. 如果找的页框中的内容被修改了，则需要将修改的内容保存到磁盘上。（注：此时需要将页框置为忙状态，以防页框被其它进程抢占掉）（旧页面写回）
+6. 页框“干净”后，操作系统将保存在磁盘上的页面内容复制到该页框中 。（新页面调入（2））
+7. 当磁盘中的页面内容全部装入页框后，向操作系统发送一个中断。操作系统更新内存中的页 表项，将虚拟页面映射的页框号更新为写入的页框，并将页框标记为正常状态。（更新页表）
+8. 恢复缺页中断发生前的状态，将程序指针重新指向引起缺页中断的指令。（恢复现场）
+9. 程序重新执行引发缺页中断的指令，进行存储访问。（继续执行）
+
+6、7会引起一个磁盘读写调用，发生上下文切换（在等待磁盘读写的过程中让其它进程运行）。
+
+缺页处理过程涉及了用户态和内核态之间的切换，虚拟地址和物理地址之间的转换（这个转换过程需要使用MMU和TLB）.
+
+### 页面置换策略
+
+\1. 一种最佳策略：从主存中移出永远不再需要的页面，如无这样的页面存在，则应选择最长时间 不需要访问的页面。
+
+\2. 先进先出算法（First-in, First-out）：总选择作业中在主存驻留时间最长的一页淘汰。
+
+\3. 最近最久不用的页面置换算法（Least Recently Used Replacement）：当需要置换一页面时，选择在最近一段时间内最久不用的页面予以淘汰。
+
+4.改进的FIFO算法—Second Chance：每个页面会增加一个访问标志位，用于标识此数据放入缓存队列后是否被再次访问过。 A是FIFO队列中最旧的页面，且其放入队列后没有被再次访问，则A被立刻淘汰；否则如果放入队列后被访问过，则将A移到FIFO队列头，并且将访问标志位清除。如果所有的页面都被访问过，则经过一次循环后就会按照FIFO的原则淘汰。
+
+5.改进的FIFO算法— Clock：Clock是Second Chance的改进版，也称最近未使用算法 (NRU, Not Recently Used)。通过一个环形队列，避免将数据在FIFO队列中移动。算法如下：产生缺页错误时，当前指针指向C，如果C被访问过，则清除C的访问标志，并将指针指向D； 如果C没有被访问过，则将新页面放入到C的位置, 置访问标志，并将指针指向D。
+
+6.最近最少使用（Least recently used）：设置一个特殊的栈，保存当前使用的各个页面的页面号。每当进程访问某页面时，便将该页面的页面号从栈中移出，将它压入栈顶。栈底始终是最近 最久未使用页面的页面号。
+
+### 更新问题
+
+若换出页面是file backed类型，且未被修改，则直接丢弃，因为磁盘上保存有相同的副本。
+
+若换出页面是file backed的类型，但已被修改，则直接写回原有位置。
+
+若换出页面是anonymous类型，若是第一次换出且未被修改，则写入Swap区，若非第一次则丢弃。
+
+若换出页面是anonymous类型，且已被修改，则写入Swap区。
+
+# 页目录自映射
+
+## 页表管理
+
+谁来管理（填写）页表？OS
+
+填写页表目的？ 反映内存布局
+
+如何填写、修改页表？ 写页表所在内存
+
+用虚拟地址还是物理地址？
+
+## 页目录自映射
+
+![img](https://img-blog.csdnimg.cn/605108f4a6634d9c8022da5b9028a763.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+页目录定义：页表页的地址映射
+
+1024个页表页逻辑上连续，物理上可以分散，其对应逻辑 ——物理映射关系记录在页目录中。
+
+页目录占1页（4KB）空间，有1024项（页目录项），每一项指向一个页表页。
+
+每一页目录项对应4MB内存， 1024个页目录项正好对应 4GB内存（整个地址空间）。
+
+关键点
+
+- 存储页表的4MB地址空间中是整个4GB虚拟地址空间中的一部分，OS设计者可规定其所在位置（4MB对齐）。
+- 一方面根据页目录的定义：记录这4MB（连续）地址空 间到物理地址空间映射关系的，是一个4KB的页目录。
+- 另一方面根据页表页的定义：记录这4MB（连续）地址空间到物理地址空间映射关系的，是一个4KB的页表页 （当然，它属于整个4MB页表的一部分）。
+- 所以，页目录和上述页表页内容相同，页目录无需额外分配单独的存储空间。
+- 页目录就是上述4MB页表中的一页。
+
+![img](https://img-blog.csdnimg.cn/1a3367fd087d4a7e9e1e933f179240a3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+自映射：页目录中有一条PDE指向自身物理地址。
+
+![img](https://img-blog.csdnimg.cn/9cd6a1dc719a4ea8b3d362a740a499e6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+![img](https://img-blog.csdnimg.cn/c2307d1719824cd7a7270328dcb42326.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+![img](https://img-blog.csdnimg.cn/be2e203de6a249baa4b4ab47f0f61986.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXNpeXVhbjA1MTU=,size_20,color_FFFFFF,t_70,g_se,x_16)![点击并拖拽以移动](data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==)编辑
+
+只要给定4M对齐的页表基址（虚拟地址），就可以得到所有页表项对应的地址，也就包括页目录表基址和自映射页目录项在页目录表中的位置。因此页目录表基址和自映射页目录项在虚空间中是计算出来的。
+
+页表主要供OS使用的，因此页表和页目录表通常放置在OS空间中（如Win的高2G空间）；
+
+“页目录自映射”的含义是页目录包含在页表当中，是我们采用的映射（或组织）方法的一个特征， 是虚拟地址空间内的映射，与虚拟地址到物理地址的映射无关！
+
+支持“页目录自映射”可节省4K（虚拟地址）空间。
