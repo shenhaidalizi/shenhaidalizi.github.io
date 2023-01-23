@@ -17,7 +17,7 @@ sidebar-avatar: /img/@UD[GM~$BRL3V(8J4X0]AJ0.jpg   # use absolute URL, seeing it
 
 
 # SNS settings
-RSS: false
+RSS: true
 weibo_username:     5975176296
 zhihu_username:     zhou-si-yuan-17-38
 github_username:    shenhaidalizi
